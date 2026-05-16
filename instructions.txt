@@ -1,0 +1,83 @@
+Part 1: The Idea (Project Overview)
+​Project Name: Bob Full-Stack Auto-Integrator (VS Code Extension)
+​The Problem:
+When developers export UI designs from Figma, they get a static frontend. Connecting this static UI to a real database requires hours of repetitive, manual work—building backend architecture, creating database schemas, setting up endpoints, and manually wiring frontend state to the new APIs. This slows down development and kills creativity.
+​The Solution:
+We built a VS Code Extension powered by IBM Bob that acts as an intelligent software development partner. It completely automates the integration process. You simply provide the static frontend codebase, and the extension instantly builds a production-ready Node.js/Express backend, connects the frontend to it, and configures the environment.  
+​The Impact (Hackathon Theme):
+This tool directly aligns with the theme "Turn idea into impact faster". It eliminates boilerplate work, allowing developers of any skill level to focus on solving meaningful problems rather than getting blocked by repetitive wiring.  
+​Part 2: How It Works (Step-by-Step Implementation)
+​Here is exactly how the extension executes the process from start to finish:
+​Step 1: Input & Extraction (The Trigger)
+​The user clicks "Generate Full-Stack" inside VS Code and selects their exported Figma UI (ZIP file).
+​The extension automatically unzips the file, scans the folder structure, and extracts the core React screens while ignoring configuration files (like vite.config.ts) to avoid breaking the app.
+​Step 2: AI Backend Generation (The Brains)
+​The extension sends the list of UI screens to the AI model.
+​The AI infers the business domain (e.g., Grocery App, E-commerce) based on file names.
+​It architects a complete Node.js + Express + MongoDB backend, generating the required routes, models, and a server.ts file, and saves them into a new generated-backend folder.
+​Step 3: AI Frontend Refactoring (The Wiring)
+​The extension passes the original static frontend code to the AI.
+​Based on strict prompt instructions, the AI removes static "mock data" and injects useEffect and axios hooks to fetch real data from the newly created backend API.
+​Crucially, the AI is constrained by "Hard Rules" to preserve all original Figma UI components and Tailwind CSS classes, ensuring the design remains 100% intact.
+​Step 4: Automated Environment Setup (The DevOps)
+​The extension does not just write code; it prepares the environment.
+​It automatically runs background terminal commands to initialize npm and install all necessary dependencies for both the frontend (e.g., axios) and the backend (e.g., express, mongoose, cors, dotenv).
+​Step 5: Plug-and-Play Output (The Result)
+​Within seconds, the user gets a fully functional, integrated Full-Stack application. The backend server is ready to run, and the frontend is successfully fetching dynamic data from the database.
+
+Hackathon Project: VS Code Extension for Full-Stack AI Generation
+
+​Team Roles & Responsibilities:
+
+
+​Member 1:
+ VS Code Extension Core Developer (Project Lead)
+​Role: Convert the Node.js CLI script into a fully functional VS Code Extension.
+​Tasks:
+​Initialize the VS Code Extension using yo code.
+​Integrate the core Node.js script into the extension.js file.
+​Replace terminal inputs with VS Code native UI components (e.g., replacing Windows File Explorer with vscode.window.showOpenDialog).
+​Register extension commands (e.g., Ctrl+Shift+P -> "Generate Full-Stack") in the package.json.
+​Tech Stack: JavaScript/TypeScript, VS Code Extension API.
+
+
+​Member 2: 
+AI & Prompt Engineer
+​Role: Optimize the AI model's behavior and enforce strict generation rules.
+​Tasks:
+​Refine the refactorFrontend prompt by adding "Hard Rules" to prevent the AI from deleting the original Figma UI/Tailwind classes.
+​Improve the generateBackend prompt to ensure it generates a production-ready Node.js/Express architecture, including a .env file.
+​Implement error handling for API rate limits and empty JSON responses.
+​Tech Stack: Prompt Engineering, JSON Parsing, API Integration (IBM Bob / OpenRouter).
+
+
+​Member 3:
+ Backend Architect & File System Handler
+​Role: Automate the backend environment setup post-generation.
+​Tasks:
+​Write a function that automatically navigates into the generated-backend folder once the AI finishes.
+​Automate the execution of npm init -y to create a package.json for the backend.
+​Automate the installation of essential backend dependencies (e.g., npm install express mongoose cors dotenv).
+​Ensure the generated backend is "plug-and-play" and ready to run.
+​Tech Stack: Node.js (child_process, fs, path), Express, MongoDB.
+
+
+​Member 4:
+ Frontend Integrator & Code Cleaner
+​Role: Fix Figma export bugs and prepare the frontend for AI integration.
+​Tasks:
+​Write a pre-processing function to automatically clean the messy package.json exported by Figma (using Regex to fix the @emotion/react versioning bugs).
+​Automate the installation of axios (npm install axios) in the unzipped frontend folder.
+​Update the ignoreFiles list so the AI doesn't break configuration files like vite.config.ts.
+​Tech Stack: React, Regex, Node.js (fs), Vite.
+
+
+​Member 5:
+ DevOps, Team Lead & Pitch Presenter
+​Role: Manage the repository, document the tool, and prepare the winning pitch.
+​Tasks:
+​Manage GitHub repository, review Pull Requests, and resolve merge conflicts.
+​Write a professional README.md with clear setup instructions and create a .env.example file.
+​Record a high-quality Demo video (or GIF) showing how the VS Code extension saves hours of manual work.
+​Prepare the final presentation (Pitch Deck) focusing on the business value for the hackathon judges.
+​Tech Stack: Git/GitHub, Markdown, Presentation & Video Editing.

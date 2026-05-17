@@ -14,3 +14,7 @@ generated-backend/
 # Extension compiled output
 out/
 *.vsix
+# Hackathon-specific files (not for GitHub)
+guides/HACKATHON_SUBMISSION.md
+guides/PROJECT_DESCRIPTION.md
+guides/DEMO_SCRIPT.md

@@ -342,7 +342,10 @@ Developed by the KND249 Team
 For issues, questions, or suggestions:
 
 - Open an issue on GitHub
-- Check the [EXTENSION_README.md](EXTENSION_README.md) for detailed documentation
+- Check the [guides/](guides/) folder for detailed documentation:
+  - [Extension Details](guides/EXTENSION_README.md)
+  - [Publishing Guide](guides/PUBLISHING_GUIDE.md)
+  - [Testing Guide](guides/TESTING_GUIDE.md)
 
 ---
 

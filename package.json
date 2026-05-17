@@ -3,7 +3,7 @@
   "displayName": "BOB Backend Generator",
   "description": "Automatically generates a complete Node.js + Express + MongoDB backend for your frontend application using AI",
   "version": "1.0.0",
-  "publisher": "knd249-team",
+  "publisher": "KND249Team",
   "repository": {
     "type": "git",
     "url": "https://github.com/Mohamedahmed-Abdelgadir/BOB-Back-to-Front-tool.git"

@@ -25,7 +25,6 @@ BOB-Back-to-Front-tool/
 ├── src/
 │   ├── extension.ts           # Extension entry point
 │   ├── backendGenerator.ts    # AI backend generation
-│   ├── frontendRefactor.ts    # Frontend integration
 │   ├── screenExtractor.ts     # Component scanning
 │   └── dependencyInstaller.ts # Package management
 ├── out/                       # Compiled JavaScript
@@ -187,8 +186,7 @@ BOB-Back-to-Front-tool/
 4. Script extracts ZIP to unzipped_frontend/
 5. Script scans for screens
 6. AI generates backend
-7. Script refactors frontend
-8. Done
+7. Done
 ```
 
 #### After (VS Code Extension)
@@ -200,9 +198,7 @@ BOB-Back-to-Front-tool/
 4. Progress notification shows status
 5. AI generates backend in generated-backend/
 6. Extension installs backend dependencies
-7. Extension refactors frontend components
-8. Extension installs frontend dependencies
-9. Success notification with actions
+7. Success notification with actions
 ```
 
 ### 6. Benefits of Migration
@@ -271,7 +267,7 @@ Now that we have a proper extension structure, we can easily add:
 
 ⏳ Pending: End-to-end testing with real workspace
 ⏳ Pending: AI generation testing
-⏳ Pending: Frontend refactoring testing
+⏳ Pending: Backend generation testing
 
 ### 10. How to Use
 

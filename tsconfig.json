@@ -13,5 +13,5 @@
     "resolveJsonModule": true,
     "moduleResolution": "node16"
   },
-  "exclude": ["node_modules", ".vscode-test", "unzipped_frontend", "generated-backend"]
+  "exclude": ["node_modules", ".vscode-test", "unzipped_frontend", "generated-backend", "test-frontend"]
 }

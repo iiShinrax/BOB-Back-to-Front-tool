@@ -47,7 +47,8 @@ export function activate(context: vscode.ExtensionContext) {
                     fs.mkdirSync(backendDir, { recursive: true });
                 }
 
-                await generateBackend(screens, backendDir);
+                // تم الإصلاح هنا: تمرير progress
+                await generateBackend(screens, backendDir, progress);
                 
                 // Step 3: Install backend dependencies
                 progress.report({ increment: 20, message: "Installing backend dependencies..." });
@@ -55,7 +56,8 @@ export function activate(context: vscode.ExtensionContext) {
 
                 // Step 4: Refactor frontend
                 progress.report({ increment: 20, message: "Refactoring frontend to connect to API..." });
-                await refactorFrontend(workspaceRoot, screens);
+                // تم الإصلاح هنا: تمرير progress
+                await refactorFrontend(workspaceRoot, screens, progress);
 
                 // Step 5: Install frontend dependencies
                 progress.report({ increment: 10, message: "Installing frontend dependencies..." });
@@ -95,5 +97,3 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {}
-
-// Made with Bob

@@ -2,151 +2,95 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { OpenAI } from 'openai';
 import * as dotenv from 'dotenv';
+import * as vscode from 'vscode';
 
-// Load environment variables
-dotenv.config();
-
-const API_KEY = process.env.OPENROUTER_API_KEY;
 const BASE_URL = "https://openrouter.ai/api/v1";
 const MODEL_NAME = "nvidia/nemotron-3-nano-30b-a3b:free";
 
-interface BackendFile {
-    filename: string;
-    content: string;
-}
+export async function generateBackend(screens: string[], outputDir: string, progress: vscode.Progress<{ message?: string; increment?: number }>): Promise<void> {
+    const workspaceRoot = path.dirname(outputDir);
+    
+    // ذكاء برمجي: تحديد مسار الـ .env بدقة سواء في مشروع المستخدم أو في مجلد الإضافة
+    let envPath = path.join(workspaceRoot, '.env');
+    if (!fs.existsSync(envPath)) {
+        envPath = path.join(__dirname, '..', '.env');
+    }
+    dotenv.config({ path: envPath });
+    
+    const API_KEY = process.env.OPENROUTER_API_KEY;
 
-interface AIResponse {
-    files: BackendFile[];
-}
-
-/**
- * Generates backend architecture using AI based on frontend screens
- * @param screens Array of screen names from the frontend
- * @param outputDir Directory where backend files will be generated
- */
-export async function generateBackend(screens: string[], outputDir: string): Promise<void> {
     if (!API_KEY) {
-        throw new Error('OPENROUTER_API_KEY not found in environment variables. Please create a .env file with your API key.');
+        throw new Error('OPENROUTER_API_KEY not found. Please put your .env file in the project folder.');
     }
 
-    console.log(`\n🧠 Analyzed frontend. Found ${screens.length} core screens.`);
-    console.log(`⚙️ Requesting AI (${MODEL_NAME}) to build Backend architecture...`);
+    progress.report({ message: "Writing backend scaffold..." });
+    writeBackendScaffold(outputDir);
 
-    const client = new OpenAI({
-        baseURL: BASE_URL,
-        apiKey: API_KEY,
-    });
+    progress.report({ message: `Generating logic for ${screens.length} screens...` });
+    const client = new OpenAI({ baseURL: BASE_URL, apiKey: API_KEY });
 
-    const prompt = `You are an expert Full-Stack Software Engineer specializing in Node.js, Express, TypeScript, and MongoDB.
-
-FRONTEND COMPONENTS DETECTED:
-${JSON.stringify(screens, null, 2)}
-
-YOUR TASK:
-Analyze these component names and generate a complete, production-ready backend architecture.
-
-REQUIREMENTS:
-1. DOMAIN INFERENCE: Determine the application type from component names (e.g., "ProductList", "Cart" = e-commerce)
-2. ARCHITECTURE: Node.js + Express + TypeScript + MongoDB (Mongoose)
-3. FILE STRUCTURE:
-   - src/server.ts: Main server with CORS, body-parser, error handling
-   - src/routes/*.ts: RESTful API routes
-   - src/models/*.ts: Mongoose schemas with TypeScript interfaces
-   - src/controllers/*.ts: Business logic separated from routes
-   - src/config/database.ts: MongoDB connection configuration
-4. BEST PRACTICES:
-   - Use async/await for all database operations
-   - Include proper error handling middleware
-   - Add input validation
-   - Use environment variables for configuration
-   - Include TypeScript types for all functions
-5. DEPENDENCIES: Include in package.json:
-   - express, mongoose, cors, dotenv
-   - @types/express, @types/node, @types/cors
-   - typescript, ts-node, nodemon
-6. CONFIGURATION FILES:
-   - package.json with scripts (dev, build, start)
-   - tsconfig.json with proper compiler options
-   - .env.example with all required variables
-   - README.md with setup instructions
-
-OUTPUT FORMAT:
-Return ONLY valid JSON. No markdown, no code blocks, no explanations.
-
-{
-  "files": [
-    { "filename": "src/server.ts", "content": "complete server code here" },
-    { "filename": "src/config/database.ts", "content": "database connection code" },
-    { "filename": "src/routes/exampleRoutes.ts", "content": "route definitions" },
-    { "filename": "src/models/ExampleModel.ts", "content": "mongoose schema" },
-    { "filename": "src/controllers/exampleController.ts", "content": "controller logic" },
-    { "filename": "package.json", "content": "complete package.json" },
-    { "filename": "tsconfig.json", "content": "typescript config" },
-    { "filename": ".env.example", "content": "environment variables template" },
-    { "filename": "README.md", "content": "setup and usage instructions" }
-  ]
-}`;
+    const prompt = `You are an expert Node.js + TypeScript + Express engineer.
+A React frontend has these screen filenames: ${JSON.stringify(screens, null, 2)}
+TASK: Generate the TypeScript source files for the backend.
+CRITICAL RULES:
+1. Generate src/server.ts, src/routes/*.ts, src/models/*.ts, src/middleware/errorHandler.ts
+2. server.ts MUST start with: import 'dotenv/config';
+3. Mount routes under /api/*
+RESPOND ONLY with valid JSON containing a "files" array.`;
 
     try {
-        const response = await client.chat.completions.create({
-            model: MODEL_NAME,
-            messages: [{ role: "user", content: prompt }],
-            temperature: 0.7,
-        });
+        const res = await client.chat.completions.create({ model: MODEL_NAME, messages: [{ role: 'user', content: prompt }] });
+        let aiText = res.choices[0]?.message?.content?.trim() || "";
 
-        let aiText = response.choices[0].message.content?.trim();
-        
-        if (!aiText) {
-            throw new Error('AI returned empty response. This might be due to rate limiting or API issues.');
-        }
-
-        // Remove markdown code blocks if present
         if (aiText.startsWith("```")) {
             aiText = aiText.replace(/^```(json)?\n/, '').replace(/```$/, '').trim();
         }
 
-        // Try to extract JSON if there's extra text
         const jsonMatch = aiText.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-            aiText = jsonMatch[0];
-        }
+        if (jsonMatch) { aiText = jsonMatch[0]; }
 
-        let aiData: AIResponse;
-        try {
-            aiData = JSON.parse(aiText);
-        } catch (parseError) {
-            console.error('Failed to parse AI response as JSON:', aiText.substring(0, 500));
-            throw new Error('AI response is not valid JSON. The AI might have included explanatory text instead of pure JSON.');
-        }
+        let data;
+        try { data = JSON.parse(aiText); } catch { throw new Error('AI returned invalid JSON.'); }
 
-        if (!aiData.files || !Array.isArray(aiData.files)) {
-            throw new Error('Invalid AI response format: missing or invalid "files" array');
-        }
-
-        // Create all backend files
-        aiData.files.forEach((fileData: BackendFile) => {
-            const fullPath = path.join(outputDir, fileData.filename);
+        for (const { filename, content } of data.files) {
+            if (typeof filename !== 'string' || typeof content !== 'string') continue;
+            const fullPath = path.join(outputDir, filename);
             const dir = path.dirname(fullPath);
-
-            // Create directory if it doesn't exist
-            if (!fs.existsSync(dir)) {
-                fs.mkdirSync(dir, { recursive: true });
-            }
-
-            // Write file content
-            fs.writeFileSync(fullPath, fileData.content, 'utf8');
-            console.log(`  📄 Created: ${fileData.filename}`);
-        });
-
-        console.log(`\n✅ Backend generated successfully in: ${outputDir}`);
-
-    } catch (error) {
-        if (error instanceof Error) {
-            console.error("❌ Error during backend generation:", error.message);
-            throw new Error(`Backend generation failed: ${error.message}`);
+            if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+            fs.writeFileSync(fullPath, content, 'utf8');
         }
-        throw error;
+
+        progress.report({ message: "Auto-fixing backend code..." });
+        validateAndFixBackend(outputDir);
+    } catch (error: any) {
+        throw new Error(`AI Generation failed: ${error.message}`);
     }
 }
 
-// Made with Bob
+function writeBackendScaffold(backendDir: string) {
+    if (!fs.existsSync(backendDir)) fs.mkdirSync(backendDir, { recursive: true });
+    const pkg = {
+        name: 'generated-backend', version: '1.0.0',
+        scripts: { dev: 'ts-node-dev --respawn --transpile-only src/server.ts', build: 'tsc', start: 'node dist/server.js' },
+        dependencies: { cors: '^2.8.5', dotenv: '^16.3.1', express: '^4.18.2', mongoose: '^8.0.3' },
+        devDependencies: { '@types/cors': '^2.8.17', '@types/express': '^4.17.21', '@types/node': '^20.11.0', 'ts-node-dev': '^2.0.0', typescript: '^5.3.3' }
+    };
+    const tsconfig = {
+        compilerOptions: { target: "ES2020", module: "Node16", outDir: "./dist", lib: ["ES2020"], strict: true, esModuleInterop: true, moduleResolution: "Node16" }
+    };
+    fs.writeFileSync(path.join(backendDir, 'package.json'), JSON.stringify(pkg, null, 2));
+    fs.writeFileSync(path.join(backendDir, 'tsconfig.json'), JSON.stringify(tsconfig, null, 2));
+    fs.writeFileSync(path.join(backendDir, '.env'), `PORT=3000\nMONGO_URI=mongodb://localhost:27017/myapp\nNODE_ENV=development\nFRONTEND_URL=http://localhost:5173\n`);
+    fs.writeFileSync(path.join(backendDir, '.gitignore'), 'node_modules/\ndist/\n.env\n');
+}
+
+function validateAndFixBackend(backendDir: string) {
+    const serverPath = path.join(backendDir, 'src/server.ts');
+    if (fs.existsSync(serverPath)) {
+        let code = fs.readFileSync(serverPath, 'utf8');
+        if (!code.includes('app.listen(')) {
+            code += '\napp.listen(process.env.PORT || 3000, () => console.log(`Server running on port ${process.env.PORT || 3000}`));\n';
+            fs.writeFileSync(serverPath, code, 'utf8');
+        }
+    }
+}

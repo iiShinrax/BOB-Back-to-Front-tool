@@ -1,127 +1,64 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { OpenAI } from 'openai';
+import * as vscode from 'vscode';
 import * as dotenv from 'dotenv';
 
-// Load environment variables
-dotenv.config();
-
-const API_KEY = process.env.OPENROUTER_API_KEY;
-const BASE_URL = "https://openrouter.ai/api/v1";
 const MODEL_NAME = "nvidia/nemotron-3-nano-30b-a3b:free";
+const BASE_URL = "[https://openrouter.ai/api/v1](https://openrouter.ai/api/v1)";
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-/**
- * Helper function to add delay between API calls
- */
-const sleep = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
+function stripFences(t: string) { return t.replace(/^```[\w]*\n?/m, '').replace(/```\s*$/m, '').trim(); }
 
-/**
- * Recursively finds a file in a directory
- */
-function findFilePath(directory: string, fileName: string): string | null {
-    if (!fs.existsSync(directory)) {
-        return null;
+function findFile(dir: string, name: string): string | null {
+    if (!fs.existsSync(dir)) return null;
+    for (const entry of fs.readdirSync(dir)) {
+        const full = path.join(dir, entry);
+        if (fs.statSync(full).isDirectory() && !['node_modules', '.git', 'generated-backend'].includes(entry)) {
+            const f = findFile(full, name); if (f) return f;
+        } else if (entry === name) return full;
     }
-
-    const files = fs.readdirSync(directory);
-    
-    for (const file of files) {
-        const fullPath = path.join(directory, file);
-        
-        if (fs.statSync(fullPath).isDirectory()) {
-            // Skip node_modules and other common directories
-            if (file === 'node_modules' || file === '.git' || file === 'generated-backend') {
-                continue;
-            }
-            
-            const found = findFilePath(fullPath, fileName);
-            if (found) return found;
-        } else if (file === fileName) {
-            return fullPath;
-        }
-    }
-    
     return null;
 }
 
-/**
- * Refactors frontend components to connect to the generated backend API
- * @param dir The workspace directory
- * @param screens Array of screen names to refactor
- */
-export async function refactorFrontend(dir: string, screens: string[]): Promise<void> {
+export async function refactorFrontend(workspaceRoot: string, screens: string[], progress: vscode.Progress<{ message?: string; increment?: number }>): Promise<void> {
+    // قراءة الـ API KEY بذكاء
+    let envPath = path.join(workspaceRoot, '.env');
+    if (!fs.existsSync(envPath)) {
+        envPath = path.join(__dirname, '..', '.env');
+    }
+    dotenv.config({ path: envPath });
+    
+    const API_KEY = process.env.OPENROUTER_API_KEY;
+
     if (!API_KEY) {
-        throw new Error('OPENROUTER_API_KEY not found in environment variables.');
+        throw new Error('OPENROUTER_API_KEY not found. Please put your .env file in the project folder.');
     }
 
-    console.log("\n✨ Refactoring Frontend: Removing mock data and linking to API...");
-
-    const client = new OpenAI({
-        baseURL: BASE_URL,
-        apiKey: API_KEY,
-    });
+    const client = new OpenAI({ baseURL: BASE_URL, apiKey: API_KEY });
+    
+    progress.report({ message: "Setting up frontend environment variables..." });
+    setupEnvironmentVariables(workspaceRoot);
 
     for (const screen of screens) {
-        const filePath = findFilePath(dir, screen);
-        
-        if (filePath) {
-            console.log(`  🔄 Refactoring ${screen}...`);
-            
-            try {
-                const oldContent = fs.readFileSync(filePath, 'utf8');
+        progress.report({ message: `Refactoring ${screen}...` });
+        const filePath = findFile(workspaceRoot, screen);
+        if (!filePath) continue;
 
-                const prompt = `You are a Senior React Developer.
-Original Code:
-${oldContent}
+        const original = fs.readFileSync(filePath, 'utf8');
+        const prompt = `You are a Senior React Developer. ORIGINAL CODE: \n${original}\nTASK: Add useState + useEffect to fetch data from "http://localhost:3000/api/" using axios. Replace mock data. HARD RULES: Keep ALL original JSX and Tailwind exactly as-is. Respond ONLY with raw code.`;
 
-TASK:
-1. REMOVE MOCK DATA (hardcoded arrays, objects, etc.).
-2. INTEGRATE API using 'useEffect' and 'axios' or 'fetch' to 'http://localhost:3000/api/'.
-3. UPDATE STATE with API data.
-4. ADD loading and error states.
-5. ENSURE proper TypeScript types if the file uses TypeScript.
-
-CRITICAL:
-Respond ONLY with the raw updated code. No markdown formatting (like \`\`\`tsx), no explanations, no comments about what you changed.`;
-
-                const response = await client.chat.completions.create({
-                    model: MODEL_NAME,
-                    messages: [{ role: "user", content: prompt }],
-                    temperature: 0.5,
-                });
-
-                const aiContent = response.choices[0]?.message?.content;
-                
-                if (!aiContent) {
-                    throw new Error("AI returned empty response (possible rate limit or API issue).");
-                }
-
-                let newContent = aiContent.trim();
-                
-                // Remove markdown code blocks if present
-                if (newContent.startsWith("```")) {
-                    newContent = newContent.replace(/^```(tsx|ts|js|jsx)?\n/i, '').replace(/```$/i, '').trim();
-                }
-
-                fs.writeFileSync(filePath, newContent, 'utf8');
-                console.log(`  ✅ Successfully linked ${screen}.`);
-                
-                // Add delay to avoid rate limiting
-                await sleep(2000);
-
-            } catch (error) {
-                if (error instanceof Error) {
-                    console.error(`  ❌ Failed to refactor ${screen}:`, error.message);
-                }
-                // Add extra delay on error to let the API recover
-                await sleep(3000);
-            }
-        } else {
-            console.log(`  ⚠️ Could not find file: ${screen}`);
+        try {
+            const res = await client.chat.completions.create({ model: MODEL_NAME, messages: [{ role: 'user', content: prompt }] });
+            const result = res.choices[0]?.message?.content?.trim() || "";
+            fs.writeFileSync(filePath, stripFences(result), 'utf8');
+        } catch (err) {
+            console.error(`Failed to refactor ${screen}:`, err);
         }
+        await sleep(2000);
     }
-    
-    console.log("\n🎉 Full-Stack integration complete! Your app is now connected to the Backend.");
 }
 
-// Made with Bob
+function setupEnvironmentVariables(frontendDir: string) {
+    fs.writeFileSync(path.join(frontendDir, '.env'), 'VITE_API_URL=http://localhost:3000\n');
+}

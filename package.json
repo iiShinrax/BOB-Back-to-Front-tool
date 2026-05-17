@@ -1,13 +1,35 @@
 {
   "name": "bob-backend-generator",
   "displayName": "BOB Backend Generator",
-  "description": "Automatically generates a complete Node.js + Express + MongoDB backend for your frontend application",
+  "description": "Automatically generates a complete Node.js + Express + MongoDB backend for your frontend application using AI",
   "version": "1.0.0",
-  "publisher": "bob-ai",
+  "publisher": "knd249-team",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mohamedahmed-Abdelgadir/BOB-Back-to-Front-tool.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Mohamedahmed-Abdelgadir/BOB-Back-to-Front-tool/issues"
+  },
+  "homepage": "https://github.com/Mohamedahmed-Abdelgadir/BOB-Back-to-Front-tool#readme",
+  "license": "MIT",
+  "keywords": [
+    "backend",
+    "generator",
+    "ai",
+    "express",
+    "mongodb",
+    "typescript",
+    "react",
+    "api",
+    "fullstack",
+    "automation"
+  ],
   "engines": {
     "vscode": "^1.75.0"
   },
   "categories": [
+    "Programming Languages",
     "Other"
   ],
   "activationEvents": [],

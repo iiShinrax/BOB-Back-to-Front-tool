@@ -335,7 +335,7 @@ MIT License - see LICENSE file for details
 
 ## Credits
 
-Developed by the BOB AI Team
+Developed by the KND249 Team
 
 ## Support
 

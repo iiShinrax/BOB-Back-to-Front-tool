@@ -163,4 +163,4 @@ MIT
 
 ## Credits
 
-Developed by the BOB AI Team
+Developed by the KND249 Team

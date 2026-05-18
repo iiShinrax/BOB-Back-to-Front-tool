@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { generateBackend } from './backendGenerator';
-import { refactorFrontend } from './frontendRefactor';
 import { extractScreenNames } from './screenExtractor';
 import { installDependencies } from './dependencyInstaller';
 
@@ -39,7 +38,7 @@ export function activate(context: vscode.ExtensionContext) {
                 vscode.window.showInformationMessage(`Found ${screens.length} screens: ${screens.join(', ')}`);
 
                 // Step 2: Generate backend
-                progress.report({ increment: 30, message: "Generating backend with AI..." });
+                progress.report({ increment: 40, message: "Generating backend with AI..." });
                 const backendDir = path.join(workspaceRoot, 'generated-backend');
                 
                 // Create backend directory if it doesn't exist
@@ -47,23 +46,13 @@ export function activate(context: vscode.ExtensionContext) {
                     fs.mkdirSync(backendDir, { recursive: true });
                 }
 
-                // تم الإصلاح هنا: تمرير progress
                 await generateBackend(screens, backendDir, progress);
                 
                 // Step 3: Install backend dependencies
-                progress.report({ increment: 20, message: "Installing backend dependencies..." });
+                progress.report({ increment: 40, message: "Installing backend dependencies..." });
                 await installDependencies(backendDir, 'backend');
 
-                // Step 4: Refactor frontend
-                progress.report({ increment: 20, message: "Refactoring frontend to connect to API..." });
-                // تم الإصلاح هنا: تمرير progress
-                await refactorFrontend(workspaceRoot, screens, progress);
-
-                // Step 5: Install frontend dependencies
-                progress.report({ increment: 10, message: "Installing frontend dependencies..." });
-                await installDependencies(workspaceRoot, 'frontend');
-
-                progress.report({ increment: 10, message: "Complete!" });
+                progress.report({ increment: 20, message: "Complete!" });
 
                 // Show success message with actions
                 const openBackend = 'Open Backend Folder';

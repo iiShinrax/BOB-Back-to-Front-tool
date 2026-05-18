@@ -8,7 +8,9 @@ vsc-extension-quickstart.md
 **/.eslintrc.json
 **/*.map
 **/*.ts
-node_modules
+node_modules/**
+!node_modules/openai/**
+!node_modules/dotenv/**
 unzipped_frontend/**
 generated-backend/**
 

@@ -53,25 +53,9 @@ BOB (Backend-Optimized Builder) is a powerful VS Code extension that analyzes yo
 
 #### From VSIX Package
 
-1. Download the `.vsix` file from releases
+1. Download the `.vsix` file
 2. In VS Code: Extensions → `...` menu → "Install from VSIX..."
 3. Select the downloaded file
-
-#### From Source (Development)
-
-```bash
-# Clone the repository
-git clone https://github.com/Mohamedahmed-Abdelgadir/BOB-Back-to-Front-tool.git
-cd BOB-Back-to-Front-tool
-
-# Install dependencies
-npm install
-
-# Compile TypeScript
-npm run compile
-
-# Press F5 in VS Code to launch Extension Development Host
-```
 
 ### Setup
 
@@ -255,68 +239,6 @@ The extension automatically excludes:
 - ts-node-dev - Development server
 - @types/* - TypeScript definitions
 
-## Development
-
-### Project Structure
-
-```
-BOB-Back-to-Front-tool/
-├── src/
-│   ├── extension.ts           # Main extension entry
-│   ├── backendGenerator.ts    # AI backend generation
-│   ├── screenExtractor.ts     # Component scanning
-│   └── dependencyInstaller.ts # Package management
-├── out/                       # Compiled JavaScript
-├── package.json              # Extension manifest
-├── tsconfig.json            # TypeScript config
-└── .vscode/
-    ├── launch.json          # Debug configuration
-    └── tasks.json           # Build tasks
-```
-
-### Building
-
-```bash
-# Install dependencies
-npm install
-
-# Compile TypeScript
-npm run compile
-
-# Watch mode (auto-compile on save)
-npm run watch
-
-# Package extension
-npm run package
-```
-
-### Debugging
-
-1. Open project in VS Code
-2. Press `F5` to launch Extension Development Host
-3. Set breakpoints in TypeScript files
-4. Test the extension in the new window
-
-### Testing
-
-```bash
-# Run tests
-npm test
-
-# Run linter
-npm run lint
-```
-
-## API Reference
-
-### Commands
-
-- `bob.generateBackend` - Generate backend from current workspace
-
-### Configuration Options
-
-Currently, all configuration is done via `.env` file. Future versions may add VS Code settings.
-
 ## Roadmap
 
 - [ ] Support for additional frameworks (Vue, Angular)
@@ -325,7 +247,6 @@ Currently, all configuration is done via `.env` file. Future versions may add VS
 - [ ] Authentication/authorization generation
 - [ ] API documentation generation
 - [ ] Docker configuration
-- [ ] CI/CD pipeline generation
 
 ## Contributing
 
@@ -334,8 +255,7 @@ Contributions are welcome! Please:
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+4. Submit a pull request
 
 ## License
 
@@ -349,12 +269,7 @@ Developed by the KND249 Team
 
 For issues, questions, or suggestions:
 
-- Open an issue on [GitHub](https://github.com/Mohamedahmed-Abdelgadir/BOB-Back-to-Front-tool/issues)
-- Check the [guides/](guides/) folder for detailed documentation:
-  - [Project Description](guides/PROJECT_DESCRIPTION.md)
-  - [Demo Script](guides/DEMO_SCRIPT.md)
-  - [Publishing Guide](guides/PUBLISHING_GUIDE.md)
-  - [Testing Guide](guides/TESTING_GUIDE.md)
+- Open an issue on [GitHub](https://github.com/Mohamedahmed-Abdelgadir/BOB-Back-to-Front-tool)
 
 ---
 

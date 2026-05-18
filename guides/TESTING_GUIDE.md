@@ -154,14 +154,9 @@ After completion, check:
    - `.env.example`
    - `README.md`
 
-3. **Frontend components updated:**
-   - Check if mock data was removed
-   - Verify API calls were added
-   - Look for axios imports
-
-4. **Dependencies installed:**
+3. **Dependencies installed:**
    - Backend: `node_modules` folder exists
-   - Frontend: axios added to dependencies
+   - All required packages present
 
 ### 8. Test the Generated Backend
 
@@ -302,7 +297,7 @@ Test the complete workflow:
 2. Run extension
 3. Verify generated files
 4. Test backend endpoints
-5. Verify frontend integration
+5. Verify backend runs successfully
 
 ## Reporting Issues
 
@@ -327,7 +322,7 @@ A successful test should result in:
 ✅ Dependencies installed successfully
 ✅ Backend server starts without errors
 ✅ API endpoints respond correctly
-✅ Frontend components updated
+✅ Database connection works
 ✅ No compilation errors
 
 ## Next Steps After Testing
@@ -336,7 +331,7 @@ A successful test should result in:
 2. Test API endpoints thoroughly
 3. Verify database operations
 4. Check error handling
-5. Test frontend integration
+5. Test backend API endpoints
 6. Deploy to staging environment
 7. Gather user feedback
 

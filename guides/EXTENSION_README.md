@@ -51,8 +51,6 @@ A powerful VS Code extension that automatically generates a complete Node.js + E
    - Analyze your frontend structure
    - Generate backend code using AI
    - Install backend dependencies
-   - Refactor frontend to connect to API
-   - Install frontend dependencies (axios)
 
 5. Your backend will be generated in the `generated-backend` folder
 
@@ -163,4 +161,4 @@ MIT
 
 ## Credits
 
-Developed by the BOB AI Team
+Developed by the KND249 Team

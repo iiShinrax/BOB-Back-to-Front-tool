@@ -1,16 +1,11 @@
-# تجاهل مجلدات المكتبات
 node_modules/
 
-# تجاهل الملفات السرية (أهم شيء)
 .env
 
-# تجاهل الملفات المضغوطة عشان ما تثقل المستودع
 *.zip
 
-# تجاهل المجلدات اللي تتولد تلقائياً (عشان كل واحد في التيم يولدها بنفسه)
 unzipped_frontend/
 generated-backend/
 
-# Extension compiled output
 out/
 *.vsix
